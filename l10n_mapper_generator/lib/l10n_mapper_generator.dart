@@ -17,12 +17,14 @@ class L10nMapperGenerator extends Generator {
   //? optional and default: null. should be parsed if translation should not return
   //? nullable values when key is not found but will return specified error message instead
   final String? message;
+  final bool useNamedParameters;
 
   L10nMapperGenerator({
     required this.l10n,
     required this.locale,
     required this.parseL10n,
     required this.message,
+    required this.useNamedParameters,
     this.classNames = const [],
   });
 
@@ -173,8 +175,19 @@ class L10nMapperGenerator extends Generator {
           // skips gen-exceptions
           if (genExceptions.contains(name)) continue;
           final parameters = method.formalParameters.map((e) => e.displayName).join(', ');
+          final positionalParameters = method.formalParameters.where((e) => e.isPositional).toList();
+          final namedParameters = method.formalParameters.where((e) => e.isNamed).toList();
 
-          buffer.writeln("'$name': ($parameters) => localizations.$name($parameters),");
+          if (useNamedParameters && namedParameters.isNotEmpty) {
+            final positionalArgs = positionalParameters.map((e) => e.displayName).join(', ');
+            final namedArgs = namedParameters.map((e) => '${e.displayName}: ${e.displayName}').join(', ');
+            final invocationArgs =
+                [if (positionalArgs.isNotEmpty) positionalArgs, if (namedArgs.isNotEmpty) namedArgs].join(', ');
+
+            buffer.writeln("'$name': ($parameters) => localizations.$name($invocationArgs),");
+          } else {
+            buffer.writeln("'$name': ($parameters) => localizations.$name($parameters),");
+          }
         }
 
         buffer.writeln('};');

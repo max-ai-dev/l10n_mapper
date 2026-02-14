@@ -15,9 +15,17 @@ Builder l10nMapperBuilder(BuilderOptions options) {
   final parseL10n = options.config['parseL10n'] as bool? ?? true;
   final message = options.config['message'] as String?;
   final classNames = (options.config['classNames'] as String?)?.split(',').map((e) => e.trim()).toList() ?? [];
+  final useNamedParameters = options.config['useNamedParameters'] as bool? ?? false;
 
   return LibraryBuilder(
-    L10nMapperGenerator(l10n: l10n, locale: locale, parseL10n: parseL10n, message: message, classNames: classNames),
+    L10nMapperGenerator(
+      l10n: l10n,
+      locale: locale,
+      parseL10n: parseL10n,
+      message: message,
+      classNames: classNames,
+      useNamedParameters: useNamedParameters,
+    ),
     generatedExtension: '.mapper.dart',
   );
 }
