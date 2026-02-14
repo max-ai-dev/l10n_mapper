@@ -12,16 +12,19 @@ extension BuildContextExtension on BuildContext {
   AppLocalizations get _localizations => AppLocalizations.of(this)!;
   AppLocalizations get l10n => _localizations;
   Locale get locale => Localizations.localeOf(this);
-  String parseL10n(String translationKey, {List<Object>? arguments}) {
+  String parseL10n(String translationKey,
+      {List<Object>? arguments, Map<String, Object?>? namedArguments}) {
     final localizations = AppLocalizations.of(this)!;
     return L10nHelper.parseL10n(localizations, translationKey,
-        arguments: arguments);
+        arguments: arguments, namedArguments: namedArguments);
   }
 }
 
 extension AppLocalizationsExtension on AppLocalizations {
-  String parseL10n(String translationKey, {List<Object>? arguments}) {
-    return L10nHelper.parseL10n(this, translationKey, arguments: arguments);
+  String parseL10n(String translationKey,
+      {List<Object>? arguments, Map<String, Object?>? namedArguments}) {
+    return L10nHelper.parseL10n(this, translationKey,
+        arguments: arguments, namedArguments: namedArguments);
   }
 }
 
@@ -30,7 +33,7 @@ class L10nHelper {
   static final Map<String, Map<String, dynamic>> _cache = {};
 
   static String parseL10n(AppLocalizations localizations, String translationKey,
-      {List<Object>? arguments}) {
+      {List<Object>? arguments, Map<String, Object?>? namedArguments}) {
 // Get or create cached map for this locale
     final localeName = localizations.localeName;
     final cachedMap = _cache[localeName];
@@ -46,9 +49,18 @@ class L10nHelper {
     final object = map[translationKey];
     if (object == null) return 'Translation key not found!';
     if (object is String) return object;
-    assert(arguments != null, 'Arguments should not be null!');
-    assert(arguments!.isNotEmpty, 'Arguments should not be empty!');
-    return Function.apply(object, arguments);
+    final hasPositionalArguments = arguments != null && arguments.isNotEmpty;
+    final hasNamedArguments =
+        namedArguments != null && namedArguments.isNotEmpty;
+    assert(hasPositionalArguments || hasNamedArguments,
+        'Arguments should not be null or empty! Provide `arguments` or `namedArguments`.');
+    final symbolArguments = hasNamedArguments
+        ? namedArguments!.map((key, value) => MapEntry(Symbol(key), value))
+        : null;
+    return Function.apply(
+        object,
+        hasPositionalArguments ? arguments! : const <Object>[],
+        symbolArguments);
   }
 
   /// Clear the cache for a specific locale or all locales
@@ -2386,149 +2398,158 @@ class AppLocalizationsMapper {
       'walletTransactionTransactionId':
           localizations.walletTransactionTransactionId,
       'walletWithdraw': localizations.walletWithdraw,
-      'ecPop_message': (errorCode) => localizations.ecPop_message(errorCode),
-      'cashierBalance': (currency) => localizations.cashierBalance(currency),
-      'cashierBalanceReverted': (currency) =>
+      'ecPop_message': ({required errorCode}) =>
+          localizations.ecPop_message(errorCode),
+      'cashierBalance': ({required currency}) =>
+          localizations.cashierBalance(currency),
+      'cashierBalanceReverted': ({required currency}) =>
           localizations.cashierBalanceReverted(currency),
-      'cashierBuyCurrency': (currency) =>
+      'cashierBuyCurrency': ({required currency}) =>
           localizations.cashierBuyCurrency(currency),
-      'cashierConvertBeforeWithdraw': (convertFrom, convertTo) =>
+      'cashierConvertBeforeWithdraw': (
+              {required convertFrom, required convertTo}) =>
           localizations.cashierConvertBeforeWithdraw(convertFrom, convertTo),
-      'cashierConvertTo': (currency) =>
+      'cashierConvertTo': ({required currency}) =>
           localizations.cashierConvertTo(currency),
-      'cashierCpfRfcProcessingDescription': (variant) =>
+      'cashierCpfRfcProcessingDescription': ({required variant}) =>
           localizations.cashierCpfRfcProcessingDescription(variant),
-      'cashierCpfRfcProcessingTitle': (variant) =>
+      'cashierCpfRfcProcessingTitle': ({required variant}) =>
           localizations.cashierCpfRfcProcessingTitle(variant),
-      'cashierCurrencyDeposit': (currency) =>
+      'cashierCurrencyDeposit': ({required currency}) =>
           localizations.cashierCurrencyDeposit(currency),
-      'cashierCurrencyWithdrawal': (currency) =>
+      'cashierCurrencyWithdrawal': ({required currency}) =>
           localizations.cashierCurrencyWithdrawal(currency),
-      'cashierCurrentBalance': (amount, currency) =>
+      'cashierCurrentBalance': ({required amount, required currency}) =>
           localizations.cashierCurrentBalance(amount, currency),
-      'cashierDepositAgents': (currency) =>
+      'cashierDepositAgents': ({required currency}) =>
           localizations.cashierDepositAgents(currency),
-      'cashierDepositCurrency': (currency) =>
+      'cashierDepositCurrency': ({required currency}) =>
           localizations.cashierDepositCurrency(currency),
-      'cashierDepositSuccessful': (currency, amount) =>
+      'cashierDepositSuccessful': ({required currency, required amount}) =>
           localizations.cashierDepositSuccessful(currency, amount),
-      'cashierDepositWarningErc20Network': (currency) =>
+      'cashierDepositWarningErc20Network': ({required currency}) =>
           localizations.cashierDepositWarningErc20Network(currency),
-      'cashierDepositWalletDepositStarted': (amount, currency) =>
+      'cashierDepositWalletDepositStarted': (
+              {required amount, required currency}) =>
           localizations.cashierDepositWalletDepositStarted(amount, currency),
-      'cashierEmailVerificationBannerBody': (brandName) =>
+      'cashierEmailVerificationBannerBody': ({required brandName}) =>
           localizations.cashierEmailVerificationBannerBody(brandName),
-      'cashierEnterCodeFromSms': (phone) =>
+      'cashierEnterCodeFromSms': ({required phone}) =>
           localizations.cashierEnterCodeFromSms(phone),
-      'cashierExchange3Confirmations': (amount, currency) =>
+      'cashierExchange3Confirmations': ({required amount, required currency}) =>
           localizations.cashierExchange3Confirmations(amount, currency),
-      'cashierExchangeFee': (amount, currency, fee) =>
+      'cashierExchangeFee': (
+              {required amount, required currency, required fee}) =>
           localizations.cashierExchangeFee(amount, currency, fee),
-      'cashierExchangeOverallBalance': (currency, amount) =>
+      'cashierExchangeOverallBalance': ({required currency, required amount}) =>
           localizations.cashierExchangeOverallBalance(currency, amount),
-      'cashierExchangeRate': (amount, currency) =>
+      'cashierExchangeRate': ({required amount, required currency}) =>
           localizations.cashierExchangeRate(amount, currency),
-      'cashierFiatContinueExternal': (provider) =>
+      'cashierFiatContinueExternal': ({required provider}) =>
           localizations.cashierFiatContinueExternal(provider),
-      'cashierFiatContinueProvider': (provider) =>
+      'cashierFiatContinueProvider': ({required provider}) =>
           localizations.cashierFiatContinueProvider(provider),
-      'cashierFiatDepositAmountPlaceholder': (currency) =>
+      'cashierFiatDepositAmountPlaceholder': ({required currency}) =>
           localizations.cashierFiatDepositAmountPlaceholder(currency),
-      'cashierFiatDepositEzeebillProviderBankTransferJpyLimits': (min, max) =>
+      'cashierFiatDepositEzeebillProviderBankTransferJpyLimits': (
+              {required min, required max}) =>
           localizations.cashierFiatDepositEzeebillProviderBankTransferJpyLimits(
               min, max),
-      'cashierFiatDepositInvalidRequest': (field) =>
+      'cashierFiatDepositInvalidRequest': ({required field}) =>
           localizations.cashierFiatDepositInvalidRequest(field),
-      'cashierFiatDepositReceived': (moneyIcon) =>
+      'cashierFiatDepositReceived': ({required moneyIcon}) =>
           localizations.cashierFiatDepositReceived(moneyIcon),
-      'cashierFiatDepositRequired': (field) =>
+      'cashierFiatDepositRequired': ({required field}) =>
           localizations.cashierFiatDepositRequired(field),
-      'cashierFiatEstimatedCurrencyRate': (currency) =>
+      'cashierFiatEstimatedCurrencyRate': ({required currency}) =>
           localizations.cashierFiatEstimatedCurrencyRate(currency),
-      'cashierFiatMinMaxDeposit': (min, max) =>
+      'cashierFiatMinMaxDeposit': ({required min, required max}) =>
           localizations.cashierFiatMinMaxDeposit(min, max),
-      'cashierFiatMinMaxWithdraw': (min, max) =>
+      'cashierFiatMinMaxWithdraw': ({required min, required max}) =>
           localizations.cashierFiatMinMaxWithdraw(min, max),
-      'cashierFiatPlacedOrderDescription': (amount) =>
+      'cashierFiatPlacedOrderDescription': ({required amount}) =>
           localizations.cashierFiatPlacedOrderDescription(amount),
-      'cashierFiatSumopayAmountDesc': (currency) =>
+      'cashierFiatSumopayAmountDesc': ({required currency}) =>
           localizations.cashierFiatSumopayAmountDesc(currency),
-      'cashierFiatWithdrawalInvalidRequest': (field) =>
+      'cashierFiatWithdrawalInvalidRequest': ({required field}) =>
           localizations.cashierFiatWithdrawalInvalidRequest(field),
-      'cashierFiatWithdrawalRequired': (field) =>
+      'cashierFiatWithdrawalRequired': ({required field}) =>
           localizations.cashierFiatWithdrawalRequired(field),
-      'cashierFundsAvailable': (amount, currency) =>
+      'cashierFundsAvailable': ({required amount, required currency}) =>
           localizations.cashierFundsAvailable(amount, currency),
-      'cashierGetBitcoinsFee': (value) =>
+      'cashierGetBitcoinsFee': ({required value}) =>
           localizations.cashierGetBitcoinsFee(value),
-      'cashierMaximumDeposit': (amount, currency) =>
+      'cashierMaximumDeposit': ({required amount, required currency}) =>
           localizations.cashierMaximumDeposit(amount, currency),
-      'cashierMinimumConversionAmount': (amount, currency) =>
+      'cashierMinimumConversionAmount': (
+              {required amount, required currency}) =>
           localizations.cashierMinimumConversionAmount(amount, currency),
-      'cashierMinimumDeposit': (amount, currency) =>
+      'cashierMinimumDeposit': ({required amount, required currency}) =>
           localizations.cashierMinimumDeposit(amount, currency),
-      'cashierMinimumWithdrawal': (amount, currency) =>
+      'cashierMinimumWithdrawal': ({required amount, required currency}) =>
           localizations.cashierMinimumWithdrawal(amount, currency),
-      'cashierNotEnoughCryptoToConvert': (currency) =>
+      'cashierNotEnoughCryptoToConvert': ({required currency}) =>
           localizations.cashierNotEnoughCryptoToConvert(currency),
-      'cashierPlacedOrderDescription': (amount, currency) =>
+      'cashierPlacedOrderDescription': ({required amount, required currency}) =>
           localizations.cashierPlacedOrderDescription(amount, currency),
-      'cashierPlacedOrderDescriptionNoAmount': (currency) =>
+      'cashierPlacedOrderDescriptionNoAmount': ({required currency}) =>
           localizations.cashierPlacedOrderDescriptionNoAmount(currency),
-      'cashierPlayNowIn': (currency) =>
+      'cashierPlayNowIn': ({required currency}) =>
           localizations.cashierPlayNowIn(currency),
-      'cashierProcessingFee': (amount, currency) =>
+      'cashierProcessingFee': ({required amount, required currency}) =>
           localizations.cashierProcessingFee(amount, currency),
-      'cashierRewardBonus': (amount, currency) =>
+      'cashierRewardBonus': ({required amount, required currency}) =>
           localizations.cashierRewardBonus(amount, currency),
-      'cashierRewardSwichCurrencyBtn': (currency) =>
+      'cashierRewardSwichCurrencyBtn': ({required currency}) =>
           localizations.cashierRewardSwichCurrencyBtn(currency),
-      'cashierRewardSwichCurrencyDepositBtn': (currency) =>
+      'cashierRewardSwichCurrencyDepositBtn': ({required currency}) =>
           localizations.cashierRewardSwichCurrencyDepositBtn(currency),
-      'cashierRewardSwichCurrencyDepositDescription': (currency, amount) =>
-          localizations.cashierRewardSwichCurrencyDepositDescription(
-              currency, amount),
-      'cashierRewardSwichCurrencyDescription': (currency) =>
+      'cashierRewardSwichCurrencyDepositDescription':
+          ({required currency, required amount}) => localizations
+              .cashierRewardSwichCurrencyDepositDescription(currency, amount),
+      'cashierRewardSwichCurrencyDescription': ({required currency}) =>
           localizations.cashierRewardSwichCurrencyDescription(currency),
-      'cashierShowMoreMethods': (qty) =>
+      'cashierShowMoreMethods': ({required qty}) =>
           localizations.cashierShowMoreMethods(qty),
-      'cashierTransactionDescription': (description) =>
+      'cashierTransactionDescription': ({required description}) =>
           localizations.cashierTransactionDescription(description),
-      'cashierTransactionPaymentTime': (datetime) =>
+      'cashierTransactionPaymentTime': ({required datetime}) =>
           localizations.cashierTransactionPaymentTime(datetime),
-      'cashierWeb3walletErrorExceedsWalletBalance': (walletBalance, currency) =>
+      'cashierWeb3walletErrorExceedsWalletBalance': (
+              {required walletBalance, required currency}) =>
           localizations.cashierWeb3walletErrorExceedsWalletBalance(
               walletBalance, currency),
-      'cashierWeb3walletErrorMinDepositAmount': (minDeposit, currency) =>
-          localizations.cashierWeb3walletErrorMinDepositAmount(
-              minDeposit, currency),
-      'cashierWeb3walletWalletLinkedBtnTitle': (walletName) =>
+      'cashierWeb3walletErrorMinDepositAmount':
+          ({required minDeposit, required currency}) => localizations
+              .cashierWeb3walletErrorMinDepositAmount(minDeposit, currency),
+      'cashierWeb3walletWalletLinkedBtnTitle': ({required walletName}) =>
           localizations.cashierWeb3walletWalletLinkedBtnTitle(walletName),
-      'cashierWeb3walletWalletLinkedDesc': (walletName) =>
+      'cashierWeb3walletWalletLinkedDesc': ({required walletName}) =>
           localizations.cashierWeb3walletWalletLinkedDesc(walletName),
-      'cashierWeb3walletWarnDisconnectActiveWallet': (wallet) =>
+      'cashierWeb3walletWarnDisconnectActiveWallet': ({required wallet}) =>
           localizations.cashierWeb3walletWarnDisconnectActiveWallet(wallet),
-      'cashierWithdrawSuccessful': (currency, amount) =>
+      'cashierWithdrawSuccessful': ({required currency, required amount}) =>
           localizations.cashierWithdrawSuccessful(currency, amount),
-      'cashierWithdrawalCurrency': (currency) =>
+      'cashierWithdrawalCurrency': ({required currency}) =>
           localizations.cashierWithdrawalCurrency(currency),
-      'cashierYouAreSpending': (transferAmount) =>
+      'cashierYouAreSpending': ({required transferAmount}) =>
           localizations.cashierYouAreSpending(transferAmount),
-      'cashierYouHaveConverted': (amount, currency) =>
+      'cashierYouHaveConverted': ({required amount, required currency}) =>
           localizations.cashierYouHaveConverted(amount, currency),
-      'cashierYourAreSpending': (amount, currency) =>
+      'cashierYourAreSpending': ({required amount, required currency}) =>
           localizations.cashierYourAreSpending(amount, currency),
-      'errorsExchangeMinWithdraw': (currency, amount) =>
+      'errorsExchangeMinWithdraw': ({required currency, required amount}) =>
           localizations.errorsExchangeMinWithdraw(currency, amount),
-      'errorsMinWithdraw': (amount, currency) =>
-          localizations.errorsMinWithdraw(amount, currency),
-      'errorsNoDepositsAvailableAtThisTime': (currency) =>
+      'errorsMinWithdraw': (
+              {required amount, required currency, required minAmount}) =>
+          localizations.errorsMinWithdraw(amount, currency, minAmount),
+      'errorsNoDepositsAvailableAtThisTime': ({required currency}) =>
           localizations.errorsNoDepositsAvailableAtThisTime(currency),
-      'errorsNoWithdrawalsAvailableAtThisTime': (currency) =>
+      'errorsNoWithdrawalsAvailableAtThisTime': ({required currency}) =>
           localizations.errorsNoWithdrawalsAvailableAtThisTime(currency),
-      'transactionExchangeDeposit': (from, to) =>
+      'transactionExchangeDeposit': ({required from, required to}) =>
           localizations.transactionExchangeDeposit(from, to),
-      'transactionExchangeWithdrawal': (from, to) =>
+      'transactionExchangeWithdrawal': ({required from, required to}) =>
           localizations.transactionExchangeWithdrawal(from, to),
     };
   }
