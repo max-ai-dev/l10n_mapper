@@ -4324,8 +4324,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorsMethodNotFound => 'الوسيلة التي تم إختيارها غير متوفرة';
 
   @override
-  String errorsMinWithdraw(Object minAmount, Object currency) {
-    return 'اقل قيمة يمكنك سحبها $minAmount $currency';
+  String errorsMinWithdraw(Object amount, Object currency) {
+    return 'اقل قيمة يمكنك سحبها $amount $currency';
   }
 
   @override

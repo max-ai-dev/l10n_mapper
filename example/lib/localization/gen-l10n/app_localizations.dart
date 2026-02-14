@@ -8340,8 +8340,8 @@ abstract class AppLocalizations {
   /// No description provided for @errorsMinWithdraw.
   ///
   /// In en, this message translates to:
-  /// **'The minimum amount you can withdraw is {minAmount} {currency}'**
-  String errorsMinWithdraw(Object minAmount, Object currency);
+  /// **'The minimum amount you can withdraw is {amount} {currency}'**
+  String errorsMinWithdraw(Object amount, Object currency);
 
   /// No description provided for @errorsMustBeLoggedIn.
   ///

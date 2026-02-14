@@ -2520,8 +2520,8 @@ class AppLocalizationsMapper {
           localizations.cashierYourAreSpending(amount, currency),
       'errorsExchangeMinWithdraw': (currency, amount) =>
           localizations.errorsExchangeMinWithdraw(currency, amount),
-      'errorsMinWithdraw': (minAmount, currency) =>
-          localizations.errorsMinWithdraw(minAmount, currency),
+      'errorsMinWithdraw': (amount, currency) =>
+          localizations.errorsMinWithdraw(amount, currency),
       'errorsNoDepositsAvailableAtThisTime': (currency) =>
           localizations.errorsNoDepositsAvailableAtThisTime(currency),
       'errorsNoWithdrawalsAvailableAtThisTime': (currency) =>

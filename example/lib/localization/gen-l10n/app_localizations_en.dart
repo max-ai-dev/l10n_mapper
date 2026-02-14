@@ -4341,8 +4341,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorsMethodNotFound => 'Selected method is not available';
 
   @override
-  String errorsMinWithdraw(Object minAmount, Object currency) {
-    return 'The minimum amount you can withdraw is $minAmount $currency';
+  String errorsMinWithdraw(Object amount, Object currency) {
+    return 'The minimum amount you can withdraw is $amount $currency';
   }
 
   @override

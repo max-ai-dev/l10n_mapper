@@ -5917,11 +5917,11 @@
     "type": "text",
     "description": "Payment method is not available"
   },
-  "errors.MIN_WITHDRAW": "The minimum amount you can withdraw is {minAmount} {currency}",
+  "errors.MIN_WITHDRAW": "The minimum amount you can withdraw is {amount} {currency}",
   "@errors.MIN_WITHDRAW": {
     "type": "text",
     "placeholders": {
-      "minAmount": {
+      "amount": {
       },
       "currency": {
       }
