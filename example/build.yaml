@@ -9,5 +9,5 @@ targets:
           l10n: true # optional default - true
           locale: true # optional default - true
           parseL10n: true # optional default - true
+          useNamedParameters: true # optional default - false
           message: "Translation key not found!" # optional default - null
-

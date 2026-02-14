@@ -72,18 +72,18 @@ class L10nMapperGenerator extends Generator {
 
           if (parseL10n) {
             bufferBuildContextExtension.writeln(
-              "${nullable ? 'String?' : 'String'} parseL10n(String translationKey, {List<Object>? arguments}) {",
+              "${nullable ? 'String?' : 'String'} parseL10n(String translationKey, {List<Object>? arguments, Map<String, Object?>? namedArguments}) {",
             );
             bufferAppLocalizationsExtension.writeln(
-              "${nullable ? 'String?' : 'String'} parseL10n(String translationKey, {List<Object>? arguments}) {",
+              "${nullable ? 'String?' : 'String'} parseL10n(String translationKey, {List<Object>? arguments, Map<String, Object?>? namedArguments}) {",
             );
 
             bufferBuildContextExtension.writeln('final localizations = $className.of(this)!;');
             bufferBuildContextExtension.writeln(
-              'return L10nHelper.parseL10n(localizations, translationKey, arguments: arguments);',
+              'return L10nHelper.parseL10n(localizations, translationKey, arguments: arguments, namedArguments: namedArguments);',
             );
             bufferAppLocalizationsExtension.writeln(
-              'return L10nHelper.parseL10n(this, translationKey, arguments: arguments);',
+              'return L10nHelper.parseL10n(this, translationKey, arguments: arguments, namedArguments: namedArguments);',
             );
 
             bufferBuildContextExtension.writeln('}');
@@ -94,7 +94,7 @@ class L10nMapperGenerator extends Generator {
             bufferL10nHelper.writeln('static final Map<String, Map<String, dynamic>> _cache = {};');
             bufferL10nHelper.writeln('');
             bufferL10nHelper.writeln(
-              'static ${nullable ? 'String?' : 'String'} parseL10n($className localizations, String translationKey, {List<Object>? arguments}) {',
+              'static ${nullable ? 'String?' : 'String'} parseL10n($className localizations, String translationKey, {List<Object>? arguments, Map<String, Object?>? namedArguments}) {',
             );
 
             bufferL10nHelper.writeln('// Get or create cached map for this locale');
@@ -119,10 +119,18 @@ class L10nMapperGenerator extends Generator {
               bufferL10nHelper.writeln('if (object is String || object == null) return object;');
             }
 
-            bufferL10nHelper.writeln("assert(arguments != null, 'Arguments should not be null!');");
-            bufferL10nHelper.writeln("assert(arguments!.isNotEmpty, 'Arguments should not be empty!');");
+            bufferL10nHelper.writeln('final hasPositionalArguments = arguments != null && arguments.isNotEmpty;');
+            bufferL10nHelper.writeln('final hasNamedArguments = namedArguments != null && namedArguments.isNotEmpty;');
+            bufferL10nHelper.writeln(
+              "assert(hasPositionalArguments || hasNamedArguments, 'Arguments should not be null or empty! Provide `arguments` or `namedArguments`.');",
+            );
+            bufferL10nHelper.writeln(
+              'final symbolArguments = hasNamedArguments ? namedArguments!.map((key, value) => MapEntry(Symbol(key), value)) : null;',
+            );
 
-            bufferL10nHelper.writeln('return Function.apply(object, arguments);');
+            bufferL10nHelper.writeln(
+              'return Function.apply(object, hasPositionalArguments ? arguments! : const <Object>[], symbolArguments);',
+            );
             bufferL10nHelper.writeln('}');
             bufferL10nHelper.writeln('');
             bufferL10nHelper.writeln('/// Clear the cache for a specific locale or all locales');
@@ -175,16 +183,13 @@ class L10nMapperGenerator extends Generator {
           // skips gen-exceptions
           if (genExceptions.contains(name)) continue;
           final parameters = method.formalParameters.map((e) => e.displayName).join(', ');
-          final positionalParameters = method.formalParameters.where((e) => e.isPositional).toList();
-          final namedParameters = method.formalParameters.where((e) => e.isNamed).toList();
 
-          if (useNamedParameters && namedParameters.isNotEmpty) {
-            final positionalArgs = positionalParameters.map((e) => e.displayName).join(', ');
-            final namedArgs = namedParameters.map((e) => '${e.displayName}: ${e.displayName}').join(', ');
-            final invocationArgs =
-                [if (positionalArgs.isNotEmpty) positionalArgs, if (namedArgs.isNotEmpty) namedArgs].join(', ');
+          if (useNamedParameters && method.formalParameters.isNotEmpty) {
+            final paramNames = method.formalParameters.map((e) => e.displayName).toList();
+            final paramDeclaration = paramNames.map((name) => 'required $name').join(', ');
+            final invocationArgs = paramNames.join(', ');
 
-            buffer.writeln("'$name': ($parameters) => localizations.$name($invocationArgs),");
+            buffer.writeln("'$name': ({$paramDeclaration}) => localizations.$name($invocationArgs),");
           } else {
             buffer.writeln("'$name': ($parameters) => localizations.$name($parameters),");
           }
