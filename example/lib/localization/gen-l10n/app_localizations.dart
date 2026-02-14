@@ -8353,7 +8353,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'The minimum amount you can withdraw is {amount} {currency}'**
-  String errorsMinWithdraw(Object amount, Object currency);
+  String errorsMinWithdraw(Object amount, Object currency, Object minAmount);
 
   /// No description provided for @errorsMustBeLoggedIn.
   ///

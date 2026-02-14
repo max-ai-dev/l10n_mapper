@@ -1,11 +1,15 @@
-name: Git Package Release
+name: Git Package Release (Legacy)
 
+# This workflow is kept for reference but disabled
+# Use the new 'release.yml' workflow instead via GitHub Actions UI
 on:
-  push:
-    branches: [ main ]
+  workflow_dispatch: # Manual trigger only
+  # Disabled automatic trigger on push
+  # push:
+  #   branches: [ main ]
 
 env:
-  flutter_version: '3.27.0'
+  flutter_version: '3.32.8'
   java_version: 17
   flutter_channel: 'stable'
   ruby_version: '2.7.5'
