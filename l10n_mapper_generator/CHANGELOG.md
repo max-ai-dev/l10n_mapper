@@ -1,3 +1,7 @@
+## 2.6.0
+* Fixed named-parameter invocation mapping in generated mapper methods.
+* Bumped minor version to 2.6.0.
+
 ## 2.5.0
 * Bumped minor version to 2.5.0.
 

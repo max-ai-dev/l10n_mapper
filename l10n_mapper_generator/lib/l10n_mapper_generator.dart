@@ -6,7 +6,12 @@ import 'package:source_gen/source_gen.dart';
 export 'l10n_mapper_builder.dart';
 
 // indicates methods mapper would not be generated for
-const genExceptions = ['of', 'delegate', 'localizationsDelegates', 'supportedLocales'];
+const genExceptions = [
+  'of',
+  'delegate',
+  'localizationsDelegates',
+  'supportedLocales',
+];
 
 class L10nMapperGenerator extends Generator {
   final bool l10n;
@@ -57,17 +62,27 @@ class L10nMapperGenerator extends Generator {
           final bufferAppLocalizationsExtension = StringBuffer();
           final bufferL10nHelper = StringBuffer();
 
-          bufferBuildContextExtension.writeln('extension $buildContextExtensionName on BuildContext {');
-          bufferAppLocalizationsExtension.writeln('extension $appLocalizationsExtensionName on $className {');
+          bufferBuildContextExtension.writeln(
+            'extension $buildContextExtensionName on BuildContext {',
+          );
+          bufferAppLocalizationsExtension.writeln(
+            'extension $appLocalizationsExtensionName on $className {',
+          );
 
-          bufferBuildContextExtension.writeln('  $className get _localizations => $className.of(this)!;');
+          bufferBuildContextExtension.writeln(
+            '  $className get _localizations => $className.of(this)!;',
+          );
 
           if (l10n) {
-            bufferBuildContextExtension.writeln('$className get l10n => _localizations;');
+            bufferBuildContextExtension.writeln(
+              '$className get l10n => _localizations;',
+            );
           }
 
           if (locale) {
-            bufferBuildContextExtension.writeln('Locale get locale => Localizations.localeOf(this);');
+            bufferBuildContextExtension.writeln(
+              'Locale get locale => Localizations.localeOf(this);',
+            );
           }
 
           if (parseL10n) {
@@ -78,7 +93,9 @@ class L10nMapperGenerator extends Generator {
               "${nullable ? 'String?' : 'String'} parseL10n(String translationKey, {List<Object>? arguments, Map<String, Object?>? namedArguments}) {",
             );
 
-            bufferBuildContextExtension.writeln('final localizations = $className.of(this)!;');
+            bufferBuildContextExtension.writeln(
+              'final localizations = $className.of(this)!;',
+            );
             bufferBuildContextExtension.writeln(
               'return L10nHelper.parseL10n(localizations, translationKey, arguments: arguments, namedArguments: namedArguments);',
             );
@@ -90,20 +107,30 @@ class L10nMapperGenerator extends Generator {
             bufferAppLocalizationsExtension.writeln('}');
 
             bufferL10nHelper.writeln('class L10nHelper {');
-            bufferL10nHelper.writeln('// Cache to store localization maps per locale');
-            bufferL10nHelper.writeln('static final Map<String, Map<String, dynamic>> _cache = {};');
+            bufferL10nHelper.writeln(
+              '// Cache to store localization maps per locale',
+            );
+            bufferL10nHelper.writeln(
+              'static final Map<String, Map<String, dynamic>> _cache = {};',
+            );
             bufferL10nHelper.writeln('');
             bufferL10nHelper.writeln(
               'static ${nullable ? 'String?' : 'String'} parseL10n($className localizations, String translationKey, {List<Object>? arguments, Map<String, Object?>? namedArguments}) {',
             );
 
-            bufferL10nHelper.writeln('// Get or create cached map for this locale');
-            bufferL10nHelper.writeln('final localeName = localizations.localeName;');
+            bufferL10nHelper.writeln(
+              '// Get or create cached map for this locale',
+            );
+            bufferL10nHelper.writeln(
+              'final localeName = localizations.localeName;',
+            );
             bufferL10nHelper.writeln('final cachedMap = _cache[localeName];');
             bufferL10nHelper.writeln('');
             bufferL10nHelper.writeln('final map = cachedMap ?? () {');
             bufferL10nHelper.writeln('  const mapper = $mapperName();');
-            bufferL10nHelper.writeln('  final newMap = mapper.toLocalizationMap(localizations);');
+            bufferL10nHelper.writeln(
+              '  final newMap = mapper.toLocalizationMap(localizations);',
+            );
             bufferL10nHelper.writeln('  _cache[localeName] = newMap;');
             bufferL10nHelper.writeln('  return newMap;');
             bufferL10nHelper.writeln('}();');
@@ -112,15 +139,23 @@ class L10nMapperGenerator extends Generator {
 
             // account for null-case
             if (!nullable) {
-              bufferL10nHelper.writeln("if (object == null) return '$message';");
+              bufferL10nHelper.writeln(
+                "if (object == null) return '$message';",
+              );
 
               bufferL10nHelper.writeln('if (object is String) return object;');
             } else {
-              bufferL10nHelper.writeln('if (object is String || object == null) return object;');
+              bufferL10nHelper.writeln(
+                'if (object is String || object == null) return object;',
+              );
             }
 
-            bufferL10nHelper.writeln('final hasPositionalArguments = arguments != null && arguments.isNotEmpty;');
-            bufferL10nHelper.writeln('final hasNamedArguments = namedArguments != null && namedArguments.isNotEmpty;');
+            bufferL10nHelper.writeln(
+              'final hasPositionalArguments = arguments != null && arguments.isNotEmpty;',
+            );
+            bufferL10nHelper.writeln(
+              'final hasNamedArguments = namedArguments != null && namedArguments.isNotEmpty;',
+            );
             bufferL10nHelper.writeln(
               "assert(hasPositionalArguments || hasNamedArguments, 'Arguments should not be null or empty! Provide `arguments` or `namedArguments`.');",
             );
@@ -133,8 +168,12 @@ class L10nMapperGenerator extends Generator {
             );
             bufferL10nHelper.writeln('}');
             bufferL10nHelper.writeln('');
-            bufferL10nHelper.writeln('/// Clear the cache for a specific locale or all locales');
-            bufferL10nHelper.writeln('static void clearCache([String? localeName]) {');
+            bufferL10nHelper.writeln(
+              '/// Clear the cache for a specific locale or all locales',
+            );
+            bufferL10nHelper.writeln(
+              'static void clearCache([String? localeName]) {',
+            );
             bufferL10nHelper.writeln('  if (localeName != null) {');
             bufferL10nHelper.writeln('    _cache.remove(localeName);');
             bufferL10nHelper.writeln('  } else {');
@@ -163,7 +202,9 @@ class L10nMapperGenerator extends Generator {
         buffer.writeln('const $mapperName();');
 
         // toLocalizationMap
-        buffer.writeln('Map<String, dynamic> toLocalizationMap($className localizations) {');
+        buffer.writeln(
+          'Map<String, dynamic> toLocalizationMap($className localizations) {',
+        );
 
         buffer.writeln('return {');
         // all getters
@@ -182,16 +223,32 @@ class L10nMapperGenerator extends Generator {
 
           // skips gen-exceptions
           if (genExceptions.contains(name)) continue;
-          final parameters = method.formalParameters.map((e) => e.displayName).join(', ');
+          final parameters = method.formalParameters
+              .map((e) => e.displayName)
+              .join(', ');
 
           if (useNamedParameters && method.formalParameters.isNotEmpty) {
-            final paramNames = method.formalParameters.map((e) => e.displayName).toList();
-            final paramDeclaration = paramNames.map((name) => 'required $name').join(', ');
-            final invocationArgs = paramNames.join(', ');
+            final paramNames = method.formalParameters
+                .map((e) => e.displayName)
+                .toList();
+            final paramDeclaration = paramNames
+                .map((name) => 'required $name')
+                .join(', ');
+            final invocationArgs = method.formalParameters
+                .map(
+                  (e) => e.isNamed
+                      ? '${e.displayName}: ${e.displayName}'
+                      : e.displayName,
+                )
+                .join(', ');
 
-            buffer.writeln("'$name': ({$paramDeclaration}) => localizations.$name($invocationArgs),");
+            buffer.writeln(
+              "'$name': ({$paramDeclaration}) => localizations.$name($invocationArgs),",
+            );
           } else {
-            buffer.writeln("'$name': ($parameters) => localizations.$name($parameters),");
+            buffer.writeln(
+              "'$name': ($parameters) => localizations.$name($parameters),",
+            );
           }
         }
 
