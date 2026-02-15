@@ -1,5 +1,6 @@
-## Unreleased
+## 2.7.0
 * Expand `analyzer` compatibility to `>=9.0.0 <11.0.0`, validated with analyzer 10.x.
+* Bumped minor version to 2.7.0.
 
 ## 2.6.0
 * Fixed named-parameter invocation mapping in generated mapper methods.
