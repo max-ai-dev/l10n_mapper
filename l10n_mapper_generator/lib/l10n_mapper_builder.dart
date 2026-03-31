@@ -14,14 +14,8 @@ Builder l10nMapperBuilder(BuilderOptions options) {
   final locale = options.config['locale'] as bool? ?? true;
   final parseL10n = options.config['parseL10n'] as bool? ?? true;
   final message = options.config['message'] as String?;
-  final classNames =
-      (options.config['classNames'] as String?)
-          ?.split(',')
-          .map((e) => e.trim())
-          .toList() ??
-      [];
-  final useNamedParameters =
-      options.config['useNamedParameters'] as bool? ?? false;
+  final classNames = (options.config['classNames'] as String?)?.split(',').map((e) => e.trim()).toList() ?? [];
+  final useNamedParameters = options.config['useNamedParameters'] as bool? ?? false;
 
   return LibraryBuilder(
     L10nMapperGenerator(

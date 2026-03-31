@@ -286,14 +286,12 @@ class L10nMapperGenerator extends Generator {
 
   @override
   FutureOr<String?> generate(LibraryReader library, BuildStep buildStep) {
-    if (classNames.isEmpty) {
-      classNames.add('AppLocalizations');
-    }
+    final targetClassNames = classNames.isEmpty ? const ['AppLocalizations'] : classNames;
 
     final buffer = StringBuffer();
 
     for (final classElement in library.classes.where((candidate) => candidate.isAbstract)) {
-      if (!classNames.contains(classElement.displayName)) {
+      if (!targetClassNames.contains(classElement.displayName)) {
         continue;
       }
 

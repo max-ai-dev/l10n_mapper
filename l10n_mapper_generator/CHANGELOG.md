@@ -1,3 +1,7 @@
+## 3.0.1
+* Raised the minimum `analyzer` version to `>=10.0.0`.
+* Added a generator smoke test to validate the package against analyzer 10.x.
+
 ## 3.0.0 [BREAKING CHANGE]
 * Replaced map-based lookup with switch expression.
 * Removed the generated mapper/cache helper architecture in favor of direct switch dispatch.
