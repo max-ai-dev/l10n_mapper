@@ -1,3 +1,8 @@
+## 3.0.0 [BREAKING CHANGE]
+* Replaced map-based lookup with switch expression.
+* Removed the generated mapper/cache helper architecture in favor of direct switch dispatch.
+* Preserved `useNamedParameters` support by allowing generated switch cases to accept `namedArguments`.
+
 ## 2.7.0
 * Expand `analyzer` compatibility to `>=9.0.0 <11.0.0`, validated with analyzer 10.x.
 * Bumped minor version to 2.7.0.
@@ -12,6 +17,11 @@
 ## 2.4.0
 * Bumped minor version to 2.4.0.
 
+## 2.3.3
+* Fixed type safety (mapper closures, parseL10n casts, Function.apply argument) and updated documentation.
+
+## 2.3.2
+* Fixed type safety (mapper closures, parseL10n casts) and updated documentation.
 ## 2.3.1
 * Fixed L10nHelper.parseL10n return type to be nullable (String?) when no fallback message is configured
 ## 2.3.0

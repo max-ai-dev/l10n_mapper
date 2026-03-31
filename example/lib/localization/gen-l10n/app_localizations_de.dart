@@ -1119,8 +1119,8 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String
-      get cashierFiatDepositBankTransferVoucherAtmJetonProviderFormDescription =>
-          'Ich bestätige, dass ich der Kontoinhaber von diesem Konto bin.';
+  get cashierFiatDepositBankTransferVoucherAtmJetonProviderFormDescription =>
+      'Ich bestätige, dass ich der Kontoinhaber von diesem Konto bin.';
 
   @override
   String get cashierFiatDepositBankTransferVoucherAtmFee =>
@@ -1311,7 +1311,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String cashierFiatDepositEzeebillProviderBankTransferJpyLimits(
-      Object min, Object max) {
+    Object min,
+    Object max,
+  ) {
     return 'Mindest- und Höchsteinzahlungsbetrag <b>$min / $max</b>';
   }
 
@@ -1411,8 +1413,8 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String
-      get cashierFiatDepositJetonProviderBankTransferVoucherAtmJpyJpyLimits =>
-          'Daily deposit limit total of USD 500,000 every 24 hours';
+  get cashierFiatDepositJetonProviderBankTransferVoucherAtmJpyJpyLimits =>
+      'Daily deposit limit total of USD 500,000 every 24 hours';
 
   @override
   String get cashierFiatDepositJetonProviderBankTransferVoucherAtmJpyLimits =>
@@ -3499,7 +3501,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String cashierRewardSwichCurrencyDepositDescription(
-      Object currency, Object amount) {
+    Object currency,
+    Object amount,
+  ) {
     return 'Du hast einen Einzahlungsbonus in einer anderen Währung aktiviert. Wechsle bitte zur $currency-Wallet und zahle $amount $currency ein, um die Belohnung zu benutzen. Alternativ kannst du sie verwirken und eine andere Belohnung ausprobieren.';
   }
 
@@ -4042,7 +4046,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String cashierWeb3walletErrorExceedsWalletBalance(
-      Object walletBalance, Object currency) {
+    Object walletBalance,
+    Object currency,
+  ) {
     return 'Exceeds wallets balance amount $walletBalance $currency';
   }
 
@@ -4051,7 +4057,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String cashierWeb3walletErrorMinDepositAmount(
-      Object minDeposit, Object currency) {
+    Object minDeposit,
+    Object currency,
+  ) {
     return 'Minimum deposit amount $minDeposit $currency';
   }
 
@@ -4615,8 +4623,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get errorsMethodNotFound => 'Selected method is not available';
 
   @override
-  String errorsMinWithdraw(Object amount, Object currency) {
-    return 'Die Mindestauszahlung beträgt $amount $currency';
+  String errorsMinWithdraw(Object minAmount, Object currency) {
+    return 'Die Mindestauszahlung beträgt $minAmount $currency';
   }
 
   @override

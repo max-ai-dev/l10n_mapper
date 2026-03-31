@@ -35,17 +35,39 @@ class HomePage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(context.parseL10n('localeName')),
+            Text(context.parseKey(AppLocalizationsKeys.localeName)),
             const SizedBox(height: 20),
-            Text(context.parseL10n('ecPop_message', arguments: ['404'])),
+            Text(
+              context.parseKey(
+                AppLocalizationsKeys.ecPop_message(errorCode: '404'),
+              ),
+            ),
             const SizedBox(height: 20),
-            Text(context.parseL10n('cashierAccountsDesc')),
+            Text(context.parseKey(AppLocalizationsKeys.cashierAccountsDesc)),
             const SizedBox(height: 20),
-            Text(context.parseL10n('cashierConvertBeforeWithdraw', arguments: ['BTC', 'USD'])),
+            Text(
+              context.parseKey(
+                AppLocalizationsKeys.cashierConvertBeforeWithdraw(
+                  convertFrom: 'BTC',
+                  convertTo: 'USD',
+                ),
+              ),
+            ),
             const SizedBox(height: 20),
-            Text(context.parseL10n('cashierConvertTo', arguments: ['EUR'])),
+            Text(
+              context.parseKey(
+                AppLocalizationsKeys.cashierConvertTo(currency: 'EUR'),
+              ),
+            ),
             const SizedBox(height: 20),
-            Text(context.parseL10n('transactionExchangeWithdrawal', arguments: ['BTC', 'USD'])),
+            Text(
+              context.parseKey(
+                AppLocalizationsKeys.transactionExchangeWithdrawal(
+                  from: 'BTC',
+                  to: 'USD',
+                ),
+              ),
+            ),
           ],
         ),
       )),

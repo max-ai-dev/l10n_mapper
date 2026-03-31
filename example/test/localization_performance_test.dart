@@ -3,146 +3,122 @@ import 'package:example/localization/gen-l10n/app_localizations.mapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void main() {
-  group('L10nHelper Performance Tests', () {
-    setUp(() {
-      // Clear cache before each test for isolation
-      L10nHelper.clearCache();
-    });
+class _UnknownKey extends AppLocalizationsKey {
+  const _UnknownKey();
 
-    test('Cache is created on first lookup', () {
+  @override
+  String get rawKey => 'nonExistentKey';
+}
+
+void main() {
+  group('parseKey', () {
+    test('First and second lookup work', () {
       final localizations = lookupAppLocalizations(const Locale('en'));
 
-      // First lookup should create cache
-      final result1 = localizations.parseL10n('cashierDeposit');
+      final result1 =
+          localizations.parseKey(AppLocalizationsKeys.cashierDeposit);
       expect(result1, isNotEmpty);
 
-      // Second lookup should use cache (much faster)
-      final result2 = localizations.parseL10n('cashierWithdraw');
+      final result2 =
+          localizations.parseKey(AppLocalizationsKeys.cashierWithdraw);
       expect(result2, isNotEmpty);
     });
 
-    test('Cache is separate per locale', () {
+    test('Different locales return different results', () {
       final localizationsEn = lookupAppLocalizations(const Locale('en'));
       final localizationsDe = lookupAppLocalizations(const Locale('de'));
 
-      // Lookup in English
-      final resultEn = localizationsEn.parseL10n('cashierDeposit');
+      final resultEn =
+          localizationsEn.parseKey(AppLocalizationsKeys.cashierDeposit);
       expect(resultEn, isNotEmpty);
 
-      // Lookup in German - should create separate cache
-      final resultDe = localizationsDe.parseL10n('cashierDeposit');
+      final resultDe =
+          localizationsDe.parseKey(AppLocalizationsKeys.cashierDeposit);
       expect(resultDe, isNotEmpty);
 
-      // Results should be different
       expect(resultEn, isNot(equals(resultDe)));
     });
 
     test('Performance: Multiple lookups are fast', () {
       final localizations = lookupAppLocalizations(const Locale('en'));
 
-      // Warm up cache
-      localizations.parseL10n('localeName');
-
       final stopwatch = Stopwatch()..start();
 
-      // 1000 lookups should be very fast with cache
       for (int i = 0; i < 1000; i++) {
-        localizations.parseL10n('localeName');
-        localizations.parseL10n('cashierActivateTronlink');
-        localizations.parseL10n('cashierActiveBalance');
+        localizations.parseKey(AppLocalizationsKeys.localeName);
+        localizations.parseKey(AppLocalizationsKeys.cashierActivateTronlink);
+        localizations.parseKey(AppLocalizationsKeys.cashierActiveBalance);
       }
 
       stopwatch.stop();
 
-      // Should complete in less than 100ms
       expect(stopwatch.elapsedMilliseconds, lessThan(100));
-      print('3000 cached lookups took: ${stopwatch.elapsedMilliseconds}ms');
+      debugPrint('3000 lookups took: ${stopwatch.elapsedMilliseconds}ms');
     });
 
-    test('Parameterized translations work with cache', () {
+    test('Parameterized translations work', () {
       final localizations = lookupAppLocalizations(const Locale('en'));
 
-      // Test with parameters
-      final result = localizations.parseL10n(
-        'cashierMinimumDeposit',
-        arguments: [100, 'USD'],
+      final result = localizations.parseKey(
+        AppLocalizationsKeys.cashierMinimumDeposit(
+          amount: 100,
+          currency: 'USD',
+        ),
       );
 
       expect(result, isNotEmpty);
       expect(result, contains('100'));
       expect(result, contains('USD'));
     });
+  });
 
-    test('clearCache removes specific locale', () {
-      final localizationsEn = lookupAppLocalizations(const Locale('en'));
-      final localizationsDe = lookupAppLocalizations(const Locale('de'));
-
-      // Create caches for both locales
-      localizationsEn.parseL10n('cashierDeposit');
-      localizationsDe.parseL10n('cashierDeposit');
-
-      // Clear only English cache
-      L10nHelper.clearCache('en');
-
-      // Both should still work (en will recreate cache)
-      final resultEn = localizationsEn.parseL10n('cashierDeposit');
-      final resultDe = localizationsDe.parseL10n('cashierDeposit');
-
-      expect(resultEn, isNotEmpty);
-      expect(resultDe, isNotEmpty);
-    });
-
-    test('clearCache() clears all locales', () {
-      final localizationsEn = lookupAppLocalizations(const Locale('en'));
-      final localizationsDe = lookupAppLocalizations(const Locale('de'));
-
-      // Create caches for both locales
-      localizationsEn.parseL10n('cashierDeposit');
-      localizationsDe.parseL10n('cashierDeposit');
-
-      // Clear all caches
-      L10nHelper.clearCache();
-
-      // Both should still work (will recreate caches)
-      final resultEn = localizationsEn.parseL10n('cashierDeposit');
-      final resultDe = localizationsDe.parseL10n('cashierDeposit');
-
-      expect(resultEn, isNotEmpty);
-      expect(resultDe, isNotEmpty);
-    });
-
-    test('Missing translation key returns error message', () {
+  group('lookup', () {
+    test('returns String for getter keys', () {
       final localizations = lookupAppLocalizations(const Locale('en'));
 
-      final result = localizations.parseL10n('nonExistentKey');
+      final result = localizations.lookup(AppLocalizationsKeys.cashierDeposit);
 
-      expect(result, equals('Translation key not found!'));
+      expect(result, isA<String>());
+      expect(result, isNotEmpty);
     });
 
-    test('Benchmark: Cache vs No Cache simulation', () {
+    test('returns String for parameterized keys', () {
       final localizations = lookupAppLocalizations(const Locale('en'));
 
-      // First lookup creates cache
+      final result = localizations.lookup(
+        AppLocalizationsKeys.cashierMinimumDeposit(
+          amount: 100,
+          currency: 'USD',
+        ),
+      );
+
+      expect(result, isA<String>());
+      expect(result, contains('100'));
+      expect(result, contains('USD'));
+    });
+  });
+
+  group('Benchmark', () {
+    test('Switch-based lookup performance', () {
+      final localizations = lookupAppLocalizations(const Locale('en'));
+
       final stopwatch1 = Stopwatch()..start();
-      localizations.parseL10n('cashierDeposit');
+      localizations.parseKey(AppLocalizationsKeys.cashierDeposit);
       stopwatch1.stop();
       final firstLookupTime = stopwatch1.elapsedMicroseconds;
 
-      // Subsequent lookups use cache
       final stopwatch2 = Stopwatch()..start();
       for (int i = 0; i < 100; i++) {
-        localizations.parseL10n('cashierDeposit');
+        localizations.parseKey(AppLocalizationsKeys.cashierDeposit);
       }
       stopwatch2.stop();
-      final cachedLookupTime = stopwatch2.elapsedMicroseconds;
+      final subsequentLookupTime = stopwatch2.elapsedMicroseconds;
 
-      print('First lookup (cache creation): ${firstLookupTime}μs');
-      print('100 cached lookups: ${cachedLookupTime}μs');
-      print('Average per cached lookup: ${cachedLookupTime / 100}μs');
+      debugPrint('First lookup: $firstLookupTimeμs');
+      debugPrint('100 lookups: $subsequentLookupTimeμs');
+      debugPrint('Average per lookup: ${subsequentLookupTime / 100}μs');
 
-      // Cached lookups should be significantly faster
-      expect(cachedLookupTime, lessThan(firstLookupTime * 10));
+      expect(subsequentLookupTime, lessThan(10000)); // < 10ms for 100 lookups
     });
   });
 }

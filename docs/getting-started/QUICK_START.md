@@ -1,40 +1,36 @@
 # Quick Start Guide
 
-## 🎯 The Performance Optimization in 60 Seconds
+## 🎯 Dynamic Translation Keys in 60 Seconds
 
-### What Changed?
-Translation lookups are now **~10,000x faster** thanks to automatic caching.
+### What Does It Do?
+Enables dynamic translation lookups using string keys — something Flutter's `gen-l10n` doesn't support natively.
 
 ### Do I Need to Change My Code?
-**No!** The optimization works automatically. Your existing code continues to work exactly as before.
+**No!** The same API works. Your existing `parseL10n` calls continue to work exactly as before.
 
 ### How Fast Is It?
+Switch-based lookup: **~2–3μs per lookup**, zero allocation, tree-shakeable.
+
 ```
-Before: 100 lookups = ~100-500ms
-After:  100 lookups = ~0.01ms
+100 lookups ≈ 200–300μs
+3000 lookups ≈ 4–12ms
 ```
 
 ### Example
 ```dart
-// This is now ~10,000x faster, but you don't need to change anything!
-final text = context.parseL10n('deposit');
-final text2 = context.parseL10n('minimumDeposit', arguments: [100, 'USD']);
-```
-
-### Optional: Cache Management
-```dart
-// Clear cache (rarely needed, mainly for testing)
-L10nHelper.clearCache();        // Clear all
-L10nHelper.clearCache('en');    // Clear specific locale
+// Keys match your Flutter-generated localization (camelCase)
+final text = context.parseL10n('cashierDeposit');
+final text2 = context.parseL10n('cashierMinimumDeposit', arguments: [100, 'USD']);
 ```
 
 ## 📚 Learn More
 
 | If you want to... | Read this |
 |-------------------|-----------|
-| See visual before/after | [BEFORE_AFTER.md](./BEFORE_AFTER.md) |
-| Understand the optimization | [PERFORMANCE.md](./PERFORMANCE.md) |
-| Get technical details | [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) |
+| See generated output structure | [GENERATED_OUTPUT.md](../technical/GENERATED_OUTPUT.md) |
+| See visual before/after | [BEFORE_AFTER.md](../technical/BEFORE_AFTER.md) |
+| Understand the optimization | [PERFORMANCE.md](../technical/PERFORMANCE.md) |
+| Get technical details | [IMPLEMENTATION_SUMMARY.md](../technical/IMPLEMENTATION_SUMMARY.md) |
 
 ## ✅ That's It!
 

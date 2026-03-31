@@ -40,69 +40,66 @@ dart pub global activate l10n_mapper_generator
 ####
 **Example usage**
 
-Note: parameters can be parsed either as positional arguments (`arguments`) or named arguments (`namedArguments`).
+Arguments must match the generated localization method signature. Use
+`arguments` for positional placeholders, or enable `useNamedParameters` to also
+allow `namedArguments` keyed by placeholder name.
 
 ```dart
-  final applicationName = context.parseL10n('application_name'); // Localization mapper
-  final depositTimeFrame = context.parseL10n('deposit_timeframe'); // Instant
-
-  // parsing placeholder parameters
-  final convertBeforeWithdraw = context.parseL10n('convert_before_withdraw', arguments: ['CAD', 'EUR']); // * For withdrawing your CAD you first need to convert it back to EUR
-
-  // when useNamedParameters is true
-  final convertBeforeWithdrawNamed = context.parseL10n(
-    'convert_before_withdraw',
-    namedArguments: {'convertFrom': 'CAD', 'convertTo': 'EUR'},
+  final text = context.parseKey(AppLocalizationsKeys.cashierDeposit);
+  final text2 = context.parseKey(
+    AppLocalizationsKeys.cashierMinimumDeposit(
+      amount: 100,
+      currency: 'USD',
+    ),
   );
+
+  final text3 = context.parseKey(
+    AppLocalizationsKeys.cashierConvertBeforeWithdraw(
+      convertFrom: 'BTC',
+      convertTo: 'USD',
+    ),
+  );
+```
 ```
 
 #### ⚡ Performance
 
-The generator includes automatic performance optimization with **lazy-initialized caching**:
-- **First lookup**: Creates translation map once per locale
-- **Subsequent lookups**: O(1) hash map access (~2,400x faster for large translation sets)
-- **Memory efficient**: Single map per active locale, minimal GC pressure
+The generator uses a **switch expression** for lookups:
+- **Zero allocation**: No map, no cache, no closures
+- **O(1) lookup**: Compiler-optimized switch expression
+- **Tree-shakeable**: Unused keys can be eliminated
 - **Zero configuration**: Works automatically, no setup required
 
-For large translation files (1000+ keys), this provides significant performance improvements. See [docs/technical/PERFORMANCE.md](../docs/technical/PERFORMANCE.md) for detailed benchmarks and implementation details.
+See [docs/technical/PERFORMANCE.md](../docs/technical/PERFORMANCE.md) for details.
 
 #### Mapper
-This generates a `app_localizations.g.dart` file provided your project already setup localization. With generated `app_localizations.dart`, utility methods are generated for dynamic localization-keys access by the generator.
 
-By default, this generates a `app_localizations.g.dart` file consisting of `l10n`, `locale` and `parseL10n` extension methods on bulild context and also a `AppLocalizationsMapper` class consisting of all key-value pairs defined in the generated `app_localizations.dart` localization file.
+Produces `app_localizations.mapper.dart` with `BuildContextExtension` and `AppLocalizationsExtension` (including `lookupKey` and `parseL10n`). See [Generated Output Reference](../docs/technical/GENERATED_OUTPUT.md).
 
-You can customize the behavior on what to generate by specifying some build configurations in your project's `build.yaml` file or stick with the default configs which generates all required extension methods. Below are all possible configuration options
+**Configuration** (`build.yaml`):
 
 ```yaml
-# build.yaml
-
 targets:
   $default:
     builders:
       l10n_mapper_generator:l10n_mapper_builder:
-        enabled: true  # enables or disables the builder
+        enabled: true
+        generate_for:
+          - lib/localization/gen-l10n/app_localizations.dart
         options:
-          l10n: true # optional default - true
-          locale: true # optional default - true
-          parseL10n: true # optional default - true
-          useNamedParameters: false # optional default - false
-          message: "Translation key not found!" # optional default - null
-          classNames: "AppLocalizations,AppLocalizationsPushNotifications" # optional default - AppLocalizations
+          l10n: true
+          locale: true
+          parseL10n: true
+          useNamedParameters: false
+          message: "Translation key not found!"
+          classNames: "AppLocalizations"
 ```
 
-To generate app-localization mapper that can be parsed dynamic translation keys, you should simply
+**Options**: `l10n`, `locale`, `parseL10n`, `useNamedParameters` (bool),
+`message` (String?), `classNames` (String). See
+[GENERATED_OUTPUT.md](../docs/technical/GENERATED_OUTPUT.md).
 
-- run `flutter gen-l10n` to generate `app_localizations.dart` file with localization related files
-- run `flutter pub run build_runner build --delete-conflicting-outputs` to generate `app_localizations.g.dart` file (if not already generated)
-
-**Available Options**
-- l10n: boolean-value with default as true - required to generate `l10n` extension method
-- locale: boolean-value with default as true - required to generate `locale` extension method
-- l10nParser: boolean-value with default as true - required to generate `l10nParser` extension method
-- useNamedParameters: boolean-value with default as false - when true, generated mapper calls use required named parameters
-- appLocalizations: location of your generated `app_localizations.dart` file after running `flutter gen-l10n`
-- message: A fallback message to return when translation-key is not found. When this is provided, `parseL10n` extension method returns message when translation key is not found else it returns a nullable string type `String?`.
-- classNames: A comma-separated list of class-names to generate mapper for. This is useful when you have multiple localization files generated by `flutter gen-l10n` and you want to generate mapper for all of them.
+**Generate**: `flutter gen-l10n` then `dart run build_runner build --delete-conflicting-outputs`
 ####
 - run the following scripts in succession (after setting-up `l10n_mapper.json` configuration file)
 
@@ -112,8 +109,8 @@ flutter gen-l10n
 ```
 
 ```shell
-# Generate required code (this should generate `app_localizations.g.dart` consisting of `AppLocalizationsExtension` and `AppLocalizationsMapper` classes)
-flutter pub run build_runner build --delete-conflicting-outputs
+# Generate app_localizations.mapper.dart
+dart run build_runner build --delete-conflicting-outputs
 ```
 
 #### Format (--format)
@@ -209,8 +206,8 @@ dart pub run l10n_mapper_generator --format
 # generate localization-related files
 flutter gen-l10n
 
-# Generate required code (this should generate `app_localizations.g.dart` consisting of `AppLocalizationsExtension` and `AppLocalizationsMapper` classes)
-flutter pub run build_runner build --delete-conflicting-outputs
+# Generate app_localizations.mapper.dart
+dart run build_runner build --delete-conflicting-outputs
 ```
 
 To run this, you can simply run the following in your terminal (project root-directory)
@@ -263,54 +260,15 @@ The translation-keys are formatted using camel-case where a key-predicate is mat
 
 With this flexibility, one can decide to prefer camel or snake casing which are both compatible with dart method naming signature and suitable for dart generated translation objects.
 
-####
-**Helper extensions**
+#### Generated output
 
-To access translations dynamically and parse placeholder parameters, a part file of `app-localizations.dart` is generated consisting of an access extension on build-context and a mapper.
+See [GENERATED_OUTPUT.md](../docs/technical/GENERATED_OUTPUT.md) for the exact structure. Summary:
 
-```dart
-// GENERATED CODE - DO NOT MODIFY BY HAND
-
-// **************************************************************************
-// L10nMapperGenerator
-// **************************************************************************
-
-import 'app_localizations.dart';
-import 'package:flutter/widgets.dart';
-
-extension AppLocalizationsExtension on BuildContext {
-  AppLocalizations get _localizations => AppLocalizations.of(this)!;
-  AppLocalizations get l10n => _localizations;
-  Locale get locale => Localizations.localeOf(this);
-  String parseL10n(String translationKey, {List<Object>? arguments, Map<String, Object?>? namedArguments}) {
-    const mapper = AppLocalizationsMapper();
-    final object = mapper.toLocalizationMap(this)[translationKey];
-    if (object == null) return 'Cannot find translation-key!';
-    if (object is String) return object;
-    final hasPositionalArguments = arguments != null && arguments.isNotEmpty;
-    final hasNamedArguments = namedArguments != null && namedArguments.isNotEmpty;
-    assert(hasPositionalArguments || hasNamedArguments, 'Arguments should not be null or empty! Provide `arguments` or `namedArguments`.');
-    final symbolArguments =
-        hasNamedArguments ? namedArguments!.map((key, value) => MapEntry(Symbol(key), value)) : null;
-    return Function.apply(object, hasPositionalArguments ? arguments! : const <Object>[], symbolArguments);
-  }
-}
-
-class AppLocalizationsMapper {
-  const AppLocalizationsMapper();
-  Map<String, dynamic> toLocalizationMap(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
-    return {
-      'localeName': localizations.localeName,
-      'application_name': localizations.application_name,
-      'deposit_timeframe': localizations.deposit_timeframe,
-      'balance_reverted': (currency) => localizations.balance_reverted(currency),
-      'convert_before_withdraw': (convertFrom, convertTo) => localizations.convert_before_withdraw(convertFrom, convertTo),
-      'convert_before_withdraw_again': (convertFrom, convertTo) => localizations.convert_before_withdraw_again(convertFrom, convertTo),
-    };
-  }
-}
-```
+- **BuildContextExtension**: `l10n`, `locale`, `parseL10n` on `BuildContext`
+- **AppLocalizationsExtension**: `lookupKey`, `parseL10n` on
+  `AppLocalizations`
+- **Named dispatch**: when `useNamedParameters` is enabled, generated switch
+  cases can accept `namedArguments` using placeholder names
 
 #### Resources
 Here is a proposal this package is aimed to resolve
